@@ -1,0 +1,12 @@
+{
+  "commit": {
+    "commit": "920b76d231519f9c0045a25ab7a5985a50dcaa71",
+    "author": "Alexander Zizka <zizka.alexander@gmail.com>",
+    "time": "2020-10-29 10:52:25",
+    "files": 2,
+    "merge": true,
+    "message": "Merge pull request #54 from johnbaums/johnbaums/patch-docs\n\nCorrection to docs"
+  },
+  "remote": "https://github.com/ropensci/CoordinateCleaner",
+  "pkg": "CoordinateCleaner"
+}
