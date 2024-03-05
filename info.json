@@ -1,0 +1,12 @@
+{
+  "commit": {
+    "commit": "ebd2b669d6b98369f98ff1e01d5970a5def53979",
+    "author": "BrunoVilela <brunovilelasilva@hotmail.com>",
+    "time": "2024-03-05 17:39:23",
+    "files": 1,
+    "merge": true,
+    "message": "Merge branch 'master' of https://github.com/ropensci/CoordinateCleaner\n"
+  },
+  "repo": "https://github.com/ropensci/CoordinateCleaner",
+  "pkg": "CoordinateCleaner"
+}
