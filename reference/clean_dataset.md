@@ -1,0 +1,161 @@
+# Coordinate Cleaning using Dataset Properties
+
+Tests for problems associated with coordinate conversions and rounding,
+based on dataset properties. Includes test to identify contributing
+datasets with potential errors with converting ddmm to dd.dd, and
+periodicity in the data decimals indicating rounding or a raster basis
+linked to low coordinate precision. Specifically:
+
+- ddmm tests for erroneous conversion from a degree minute format (ddmm)
+  to a decimal degree (dd.dd) format
+
+- periodicity test for periodicity in the data, which can indicate
+  imprecise coordinates, due to rounding or rasterization.
+
+## Usage
+
+``` r
+clean_dataset(
+  x,
+  lon = "decimalLongitude",
+  lat = "decimalLatitude",
+  ds = "dataset",
+  tests = c("ddmm", "periodicity"),
+  value = "dataset",
+  verbose = TRUE,
+  ...
+)
+```
+
+## Arguments
+
+- x:
+
+  data.frame. Containing geographical coordinates and species names.
+
+- lon:
+
+  character string. The column with the longitude coordinates. Default =
+  “decimalLongitude”.
+
+- lat:
+
+  character string. The column with the latitude coordinates. Default =
+  “decimalLatitude”.
+
+- ds:
+
+  a character string. The column with the dataset of each record. In
+  case `x` should be treated as a single dataset, identical for all
+  records. Default = “dataset”.
+
+- tests:
+
+  a vector of character strings, indicating which tests to run. See
+  details for all tests available. Default = c("ddmm", "periodicity")
+
+- value:
+
+  a character string. Defining the output value. See value. Default =
+  “dataset”.
+
+- verbose:
+
+  logical. If TRUE reports the name of the test and the number of
+  records flagged.
+
+- ...:
+
+  additional arguments to be passed to
+  [`cd_ddmm`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_ddmm.md)
+  and
+  [`cd_round`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_round.md)
+  to customize test sensitivity.
+
+## Value
+
+Depending on the ‘value’ argument:
+
+- “dataset”:
+
+  a `data.frame` with the the test summary statistics for each dataset
+  in `x`
+
+- “clean”:
+
+  a `data.frame` containing only records from datasets in `x` that
+  passed the tests
+
+- “flagged”:
+
+  a logical vector of the same length as rows in `x`, with TRUE = test
+  passed and FALSE = test failed/potentially problematic.
+
+## Details
+
+These tests are based on the statistical distribution of coordinates and
+their decimals within datasets of geographic distribution records to
+identify datasets with potential errors/biases. Three potential error
+sources can be identified. The ddmm flag tests for the particular
+pattern that emerges if geographical coordinates in a degree minute
+annotation are transferred into decimal degrees, simply replacing the
+degree symbol with the decimal point. This kind of problem has been
+observed by in older datasets first recorded on paper using typewriters,
+where e.g. a floating point was used as symbol for degrees. The function
+uses a binomial test to check if more records than expected have
+decimals below 0.6 (which is the maximum that can be obtained in
+minutes, as one degree has 60 minutes) and if the number of these
+records is higher than those above 0.59 by a certain proportion. The
+periodicity test uses rate estimation in a Poisson process to estimate
+if there is periodicity in the decimals of a dataset (as would be
+expected by for example rounding or data that was collected in a raster
+format) and if there is an over proportional number of records with the
+decimal 0 (full degrees) which indicates rounding and thus low
+precision. The default values are empirically optimized by with GBIF
+data, but should probably be adapted.
+
+## Note
+
+See <https://ropensci.github.io/CoordinateCleaner/> for more details and
+tutorials.
+
+## See also
+
+[`cd_ddmm`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_ddmm.md)
+[`cd_round`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_round.md)
+
+Other Wrapper functions:
+[`clean_coordinates()`](https://docs.ropensci.org/CoordinateCleaner/reference/clean_coordinates.md),
+[`clean_fossils()`](https://docs.ropensci.org/CoordinateCleaner/reference/clean_fossils.md)
+
+## Examples
+
+``` r
+#Create test dataset
+clean <- data.frame(dataset = rep("clean", 1000),
+                    decimalLongitude = runif(min = -43, max = -40, n = 1000),
+                    decimalLatitude = runif(min = -13, max = -10, n = 1000))
+                    
+bias.long <- c(round(runif(min = -42, max = -40, n = 500), 1),
+               round(runif(min = -42, max = -40, n = 300), 0),
+               runif(min = -42, max = -40, n = 200))
+bias.lat <- c(round(runif(min = -12, max = -10, n = 500), 1),
+              round(runif(min = -12, max = -10, n = 300), 0),
+              runif(min = -12, max = -10, n = 200))
+bias <- data.frame(dataset = rep("biased", 1000),
+                   decimalLongitude = bias.long,
+                   decimalLatitude = bias.lat)
+test <- rbind(clean, bias)
+
+if (FALSE) { # \dontrun{                  
+#run clean_dataset
+flags <- clean_dataset(test)
+
+#check problems
+#clean
+hist(test[test$dataset == rownames(flags[flags$summary,]), "decimalLongitude"])
+#biased
+hist(test[test$dataset == rownames(flags[!flags$summary,]), "decimalLongitude"])
+
+} # }
+```

@@ -1,0 +1,13 @@
+{
+  "commit": {
+    "commit": "9195fb64154dd20a921a412b5e4d24cc18d3803c",
+    "author": "Alexander Zizka <zizka.alexander@gmail.com>",
+    "time": "2025-05-27T10:29:27Z",
+    "files": 2,
+    "merge": true,
+    "message": "Merge pull request #108 from plantarum/tws_cc_sea\n\nenhancement related to terra and clarification of countrycodes\n\nFaster cc_sea(): switched terra:extract to terra:relate"
+  },
+  "repo": "https://github.com/ropensci/CoordinateCleaner",
+  "pkg": "CoordinateCleaner",
+  "time": "2026-08-18T12:17:55Z"
+}
