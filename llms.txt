@@ -1,0 +1,242 @@
+# CoordinateCleaner v3.0
+
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/CoordinateCleaner)](https://cranlogs.r-pkg.org:443/badges/CoordinateCleaner)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/CoordinateCleaner)](https://cranlogs.r-pkg.org:443/badges/grand-total/CoordinateCleaner)
+[![rstudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/CoordinateCleaner)](https://cranlogs.r-pkg.org:443/badges/CoordinateCleaner)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2539408.svg)](https://doi.org/10.5281/zenodo.2539408)
+[![rOpenSci
+peer-review](https://badges.ropensci.org/210_status.svg)](https://github.com/ropensci/software-review/issues/210)
+
+**CoordinateCleaner has been updated to version 3.0 on github and on
+CRAN to adapt to the retirement of sp and raster. The update may not be
+compatible with analysis-pipelines build with version 2.x**\*
+
+Automated flagging of common spatial and temporal errors in biological
+and palaeontological collection data, for the use in conservation,
+ecology and palaeontology. Specifically includes tests for
+
+- General coordinate validity
+- Country and province centroids
+- Capital coordinates
+- Coordinates of biodiversity institutions
+- Spatial outliers
+- Temporal outliers
+- Coordinate-country discordance
+- Duplicated coordinates per species
+- Assignment to the location of the GBIF headquarters
+- Urban areas
+- Seas
+- Plain zeros
+- Equal longitude and latitude
+- Rounded coordinates
+- DDMM to DD.DD coordinate conversion errors
+- Large temporal uncertainty (fossils)
+- Equal minimum and maximum ages (fossils)
+- Spatio-temporal outliers (fossils)
+
+CoordinateCleaner can be particularly useful to improve data quality
+when using data from GBIF (e.g. obtained with
+[rgbif](https://github.com/ropensci/rgbif)) or the Paleobiology database
+(e.g. obtained with
+[paleobioDB](https://github.com/ropensci/paleobioDB)) for historical
+biogeography (e.g. with
+[BioGeoBEARS](https://CRAN.R-project.org/package=BioGeoBEARS) or
+[phytools](https://CRAN.R-project.org/package=phytools)), automated
+conservation assessment (e.g. with
+[speciesgeocodeR](https://github.com/azizka/speciesgeocodeR/wiki) or
+[conR](https://CRAN.R-project.org/package=ConR)) or species distribution
+modelling (e.g. with [dismo](https://CRAN.R-project.org/package=dismo)
+or [sdm](https://CRAN.R-project.org/package=sdm)). See
+[scrubr](https://github.com/ropensci-archive/scrubr) and
+[taxize](https://github.com/ropensci/taxize) for complementary taxonomic
+cleaning or [biogeo](https://github.com/cran/biogeo) for correcting
+spatial coordinate errors.
+
+See
+[News](https://github.com/ropensci/CoordinateCleaner/blob/master/NEWS.md)
+for update information.
+
+# Installation
+
+## Stable from CRAN
+
+``` r
+
+install.packages("CoordinateCleaner")
+library(CoordinateCleaner)
+```
+
+## Developmental from GitHub
+
+``` r
+
+devtools::install_github("ropensci/CoordinateCleaner")
+library(CoordinateCleaner)
+```
+
+# Usage
+
+A simple example:
+
+``` r
+
+# Simulate example data
+minages <- runif(250, 0, 65)
+exmpl <- data.frame(species = sample(letters, size = 250, replace = TRUE),
+                    decimalLongitude = runif(250, min = 42, max = 51),
+                    decimalLatitude = runif(250, min = -26, max = -11),
+                    min_ma = minages,
+                    max_ma = minages + runif(250, 0.1, 65),
+                    dataset = "clean")
+
+# Run record-level tests
+rl <- clean_coordinates(x = exmpl)
+summary(rl)
+plot(rl)
+
+# Dataset level 
+dsl <- clean_dataset(exmpl)
+
+# For fossils
+fl <- clean_fossils(x = exmpl,
+                          taxon = "species",
+                          lon = "decimalLongitude", 
+                          lat = "decimalLatitude")
+summary(fl)
+
+# Alternative example using the pipe
+library(tidyverse)
+
+cl <- exmpl %>%
+  cc_val()%>%
+  cc_cap()%>%
+  cd_ddmm()%>%
+  cf_range(lon = "decimalLongitude", 
+           lat = "decimalLatitude", 
+           taxon  ="species")
+```
+
+# Documentation
+
+Pipelines for cleaning data from the Global Biodiversity Information
+Facility (GBIF) and the Paleobiology Database (PaleobioDB) are available
+in [here](https://ropensci.github.io/CoordinateCleaner/articles/).
+
+# Contributing
+
+See the
+[CONTRIBUTING](https://github.com/ropensci/CoordinateCleaner/blob/master/CONTRIBUTING.md)
+document.
+
+# Citation
+
+Zizka A, Silvestro D, Andermann T, Azevedo J, Duarte Ritter C, Edler D,
+Farooq H, Herdean A, Ariza M, Scharn R, Svanteson S, Wengtrom N, Zizka V
+& Antonelli A (2019) CoordinateCleaner: standardized cleaning of
+occurrence records from biological collection databases. Methods in
+Ecology and Evolution, 10(5):744-751, <doi:10.1111/2041-210X.13152>,
+<https://github.com/ropensci/CoordinateCleaner>
+
+# Package index
+
+## Wrapper functions
+
+- [`clean_coordinates()`](https://docs.ropensci.org/CoordinateCleaner/reference/clean_coordinates.md)
+  : Geographic Cleaning of Coordinates from Biologic Collections
+- [`clean_dataset()`](https://docs.ropensci.org/CoordinateCleaner/reference/clean_dataset.md)
+  : Coordinate Cleaning using Dataset Properties
+- [`clean_fossils()`](https://docs.ropensci.org/CoordinateCleaner/reference/clean_fossils.md)
+  : Geographic and Temporal Cleaning of Records from Fossil Collections
+
+## Geographic coordinate cleaning
+
+- [`cc_aohi()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_aohi.md)
+  : Identify Coordinates in Artificial Hotspot Occurrence Inventory
+- [`cc_cap()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_cap.md)
+  : Identify Coordinates in Vicinity of Country Capitals.
+- [`cc_cen()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_cen.md)
+  : Identify Coordinates in Vicinity of Country and Province Centroids
+- [`cc_coun()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_coun.md)
+  : Identify Coordinates Outside their Reported Country
+- [`cc_dupl()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_dupl.md)
+  : Identify Duplicated Records
+- [`cc_equ()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_equ.md)
+  : Identify Records with Identical lat/lon
+- [`cc_gbif()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_gbif.md)
+  : Identify Records Assigned to GBIF Headquarters
+- [`cc_inst()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_inst.md)
+  : Identify Records in the Vicinity of Biodiversity Institutions
+- [`cc_iucn()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_iucn.md)
+  : Identify Records Outside Natural Ranges
+- [`cc_outl()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_outl.md)
+  : Identify Geographic Outliers in Species Distributions
+- [`cc_sea()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_sea.md)
+  : Identify Non-terrestrial Coordinates
+- [`cc_urb()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_urb.md)
+  : Identify Records Inside Urban Areas
+- [`cc_val()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_val.md)
+  : Identify Invalid lat/lon Coordinates
+- [`cc_zero()`](https://docs.ropensci.org/CoordinateCleaner/reference/cc_zero.md)
+  : Identify Zero Coordinates
+
+## Dataset-levelcleaning
+
+- [`cd_ddmm()`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_ddmm.md)
+  : Identify Datasets with a Degree Conversion Error
+- [`cd_round()`](https://docs.ropensci.org/CoordinateCleaner/reference/cd_round.md)
+  : Identify Datasets with Rasterized Coordinates
+
+## Fossil cleaning
+
+- [`cf_age()`](https://docs.ropensci.org/CoordinateCleaner/reference/cf_age.md)
+  : Identify Fossils with Outlier Age
+- [`cf_equal()`](https://docs.ropensci.org/CoordinateCleaner/reference/cf_equal.md)
+  : Identify Fossils with equal min and max age
+- [`cf_outl()`](https://docs.ropensci.org/CoordinateCleaner/reference/cf_outl.md)
+  : Identify Outlier Records in Space and Time
+- [`cf_range()`](https://docs.ropensci.org/CoordinateCleaner/reference/cf_range.md)
+  : Identify Fossils with Extreme Age Ranges
+- [`write_pyrate()`](https://docs.ropensci.org/CoordinateCleaner/reference/write_pyrate.md)
+  : Create Input Files for PyRate
+
+## Data
+
+- [`buffland`](https://docs.ropensci.org/CoordinateCleaner/reference/buffland.md)
+  : Global Coastlines buffered by 1 degree
+- [`buffsea`](https://docs.ropensci.org/CoordinateCleaner/reference/buffsea.md)
+  : Global Coastlines buffered by -1 degree
+- [`countryref`](https://docs.ropensci.org/CoordinateCleaner/reference/countryref.md)
+  : Country Centroids and Country Capitals
+- [`institutions`](https://docs.ropensci.org/CoordinateCleaner/reference/institutions.md)
+  : Global Locations of Biodiversity Institutions
+- [`pbdb_example`](https://docs.ropensci.org/CoordinateCleaner/reference/pbdb_example.md)
+  : Example data from the Paleobiologydatabase
+- [`aohi`](https://docs.ropensci.org/CoordinateCleaner/reference/aohi.md)
+  : Artificial Hotspot Occurrence Inventory
+
+## Visualization
+
+- [`plot(`*`<spatialvalid>`*`)`](https://docs.ropensci.org/CoordinateCleaner/reference/plot.spatialvalid.md)
+  : Plot Method for Class Spatialvalid
+
+## Check
+
+- [`is.spatialvalid()`](https://docs.ropensci.org/CoordinateCleaner/reference/is.spatialvalid.md)
+  : Check spatialvalid object
+
+# Articles
+
+### All vignettes
+
+- [Cleaning GBIF data for the use in
+  biogeography](https://docs.ropensci.org/CoordinateCleaner/articles/Cleaning_GBIF_data_with_CoordinateCleaner.md):
+- [Cleaning fossil data for the use in biogeography and
+  palaeontology](https://docs.ropensci.org/CoordinateCleaner/articles/Cleaning_PBDB_fossils_with_CoordinateCleaner.md):
+- [Comparison of CoordinateCleaner to other
+  tools](https://docs.ropensci.org/CoordinateCleaner/articles/Comparison_other_software.md):
+- [Using customized
+  gazetteers](https://docs.ropensci.org/CoordinateCleaner/articles/Using_custom_gazetteers.md):
